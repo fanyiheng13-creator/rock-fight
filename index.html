@@ -27,8 +27,10 @@
     .fill { z-index:1; }.ghost { background:rgba(255,255,255,.2); transition:width .65s ease .1s; }
     #pFill { background:linear-gradient(90deg,#dc493a,#efcf4c); } #eFill { background:linear-gradient(90deg,#efcf4c,#dc493a); }
     .versus { color:var(--red); text-align:center; font-weight:1000; }
-    .stage { position:relative; overflow:hidden; border:1px solid #58635f; background:#1b2426; box-shadow:0 22px 60px #0007; }
+    .stage { position:relative; overflow:hidden; aspect-ratio:16/9; border:1px solid #58635f; background:#1b2426; box-shadow:0 22px 60px #0007; }
     canvas { display:block; width:100%; aspect-ratio:16/9; }
+    #arena { position:absolute; inset:0; z-index:2; width:100%; height:100%; }
+    #arena3d { position:absolute; inset:0; z-index:1; width:100%; height:100%; }
     .stage-label { position:absolute; inset:13px 16px auto; display:flex; justify-content:space-between; z-index:2; pointer-events:none; color:#f8f1dcbb; font-size:9px; font-weight:900; letter-spacing:1px; }
     .overlay,.flash { position:absolute; inset:0; z-index:4; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#0c1112aa; text-align:center; }
     .overlay { transition:opacity .2s ease,visibility .2s ease; }.overlay.hidden { opacity:0; visibility:hidden; }
@@ -106,13 +108,49 @@
     }
     @media(max-width:420px) { .caption,.attack small { display:none; }.attack { flex-direction:column; gap:3px; }.moves { font-size:9px; } }
     @media(max-width:760px) {
-      .moves .key:nth-of-type(-n+2), .moves .sep { display:none; }
-      .moves .key { width:56px; min-width:56px; height:54px; font-size:22px; }
+      .moves { flex-wrap:wrap; gap:6px; font-size:12px; }
+      .moves .key { width:44px; min-width:44px; height:48px; font-size:18px; }
       .moves { gap:9px; font-size:12px; }
       .attack { min-height:58px; }
       .attack-key { width:30px; min-width:30px; height:32px; font-size:16px; }
     }
     @media(max-width:420px) { .attack { min-height:64px; }.attack b { font-size:10px; } }
+    /* ===== 在线对战 ===== */
+    .drunk-track { height:8px; margin-top:5px; border-color:#7a6a3a; }
+    #pDrunk { background:linear-gradient(90deg,#f0c24b,#e07b39); }
+    #eDrunk { background:linear-gradient(90deg,#e07b39,#f0c24b); }
+    .conn-badge { position:absolute; z-index:11; top:13px; left:50%; transform:translateX(-50%); padding:5px 12px; border:1px solid #4b5652; background:#151c1ecc; color:#c9d2cb; font-size:11px; font-weight:800; }
+    .conn-badge[data-state="connected"] { border-color:#3f8f5a; color:#9ee7b4; }
+    .conn-badge[data-state="disconnected"] { border-color:#a33; color:#ff9a86; }
+    .online-panel { position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; justify-content:center; gap:10px; padding:clamp(14px,3vw,30px); background:linear-gradient(135deg,#101719f7,#20292bf2); overflow:auto; }
+    .online-panel[hidden] { display:none; }
+    .online-panel h2 { margin:0; color:var(--yellow); font-size:clamp(20px,3.4vw,30px); }
+    .online-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+    .online-row input { min-width:180px; flex:1; padding:9px 11px; border:1px solid #56615d; background:#171f21; color:var(--paper); font:inherit; }
+    .online-row button { min-height:40px; padding:0 15px; border:1px solid #82908a; background:#20292b; color:var(--paper); font-weight:900; }
+    .online-row button.primary { border-color:var(--red); background:var(--red); color:var(--ink); }
+    .room-code { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:11px 14px; border:1px dashed #6d7a75; background:#131a1c; }
+    .room-code b { color:var(--yellow); font-size:clamp(24px,4.6vw,38px); letter-spacing:6px; }
+    .slot-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+    .slot { padding:9px 11px; border:1px solid #4b5652; background:#1a2224; font-size:12px; }
+    .slot.empty { border-style:dashed; color:#7f8a84; }
+    .slot .slot-name { display:block; margin-bottom:5px; font-weight:900; font-size:13px; }
+    .slot .tag { display:inline-block; margin-right:5px; padding:2px 7px; border:1px solid #55605b; font-size:10px; font-weight:800; }
+    .slot .tag.ready { border-color:#3f8f5a; color:#9ee7b4; }
+    .slot .tag.off { border-color:#a33; color:#ff9a86; }
+    .slot .tag.you { border-color:var(--yellow); color:var(--yellow); }
+    .online-note { margin:0; color:#95a09a; font-size:11px; line-height:1.6; }
+    .countdown-panel { position:absolute; inset:0; z-index:12; display:grid; place-content:center; background:#0a0f11cc; }
+    .countdown-panel[hidden] { display:none; }
+    .countdown-panel b { color:var(--yellow); font-size:clamp(70px,18vw,160px); text-shadow:5px 5px var(--red); animation:calloutFlash .55s ease both; }
+    .drunk-num { display:inline-block; margin-top:3px; color:#e0b040; font-size:10px; font-weight:900; }
+    .drunk-num.full { color:#ff6b6b; }
+    #arena3d { position:absolute; inset:0; z-index:1; width:100%; height:100%; background:#0a0f11; }
+    #arena3d[hidden] { display:none; }
+    .render-toggle { display:flex; align-items:center; justify-content:center; gap:7px; margin:0 0 10px; color:#c9d2cb; font-size:12px; font-weight:800; }
+    .render-toggle input { width:16px; height:16px; }
+    .vomit-hint { position:absolute; z-index:11; top:44px; left:50%; transform:translateX(-50%); padding:6px 14px; border:1px solid #9be36a; background:#141d0fe6; color:#c7f27a; font-size:12px; font-weight:900; }
+    .vomit-hint[hidden] { display:none; }
   </style>
 </head>
 <body>
@@ -122,19 +160,21 @@
     <div class="round" id="round">ROUND 01 <b>·</b> 未开始</div>
   </header>
   <section class="hud" aria-label="战斗状态">
-    <div><div class="fighter-line"><span class="fighter-name" id="playerName">主唱</span><span class="caption" id="playerCaption">PLAYER 1</span><strong id="pText">100</strong></div><div class="track"><div class="ghost"></div><div class="fill" id="pFill"></div></div></div>
+    <div><div class="fighter-line"><span class="fighter-name" id="playerName">主唱</span><span class="caption" id="playerCaption">PLAYER 1</span><strong id="pText">100</strong></div><div class="track"><div class="ghost"></div><div class="fill" id="pFill"></div></div><div class="track drunk-track"><div class="fill" id="pDrunk"></div></div><span class="drunk-num" id="pDrunkNum">醉 0%</span></div>
     <div class="versus">VS</div>
-    <div><div class="fighter-line"><span class="fighter-name" id="enemyName">管啸天</span><span class="caption">CHALLENGER</span><strong id="eText">100</strong></div><div class="track"><div class="ghost" id="eGhost"></div><div class="fill" id="eFill"></div></div></div>
+    <div><div class="fighter-line"><span class="fighter-name" id="enemyName">管啸天</span><span class="caption">CHALLENGER</span><strong id="eText">100</strong></div><div class="track"><div class="ghost" id="eGhost"></div><div class="fill" id="eFill"></div></div><div class="track drunk-track"><div class="fill" id="eDrunk"></div></div><span class="drunk-num" id="eDrunkNum">醉 0%</span></div>
   </section>
   <section class="stage" aria-label="乐队擂台对决">
     <canvas id="arena" aria-label="格斗游戏画面"></canvas>
+    <canvas id="arena3d" aria-label="3D 格斗画面" hidden></canvas>
     <div class="stage-label"><span id="status">等待开战</span><span>NO CONTINUES</span></div>
-    <div class="overlay" id="intro"><p class="over-kicker">PAIN DEPARTMENT · LIVE</p><h2>地下摇滚王座之争</h2><p>选好你的角色，登上疼痛部舞台完成这场对决。</p><button class="start" id="start">进入现场 <span>↗</span></button></div>
+    <div class="vomit-hint" id="vomitHint" hidden>酒满了！同时按 J + K → 呕吐攻击（50 伤害）</div>
+    <div class="overlay" id="intro"><p class="over-kicker">PAIN DEPARTMENT · LIVE</p><h2>地下摇滚王座之争</h2><p>单机：进入现场选角开打。联机：建房后把邀请链接发给朋友。</p><div class="online-row" style="justify-content:center"><button class="start" id="start">进入现场 <span>↗</span></button><button class="start" id="openOnline" style="background:var(--teal);color:var(--ink)">在线对战 ⇄</button></div><label class="render-toggle"><input type="checkbox" id="use3D" checked> 3D 画面（取消勾选回到经典 2D）</label></div>
         <section class="scene-panel" id="selectPanel" hidden aria-label="选择角色">
           <h2 class="scene-heading">选一个人，上台</h2><p class="scene-subtitle">确认角色后将进入专属剧情与战斗。</p>
           <div class="character-grid" id="characterGrid">
-            <button class="character-card selected" data-character="baiyunfeng" style="--hair:#26282b;--coat:#e8e2d4;--shirt:#2e3033"><span class="card-portrait"></span><strong>白云峰</strong><small>疼痛部主唱</small><p>乱发加眼镜，白衬衫的脏手指主唱。</p></button>
-            <button class="character-card" data-character="guanxiaotian" style="--hair:#1b1d1f;--coat:#6e7480;--shirt:#9aa1ab"><span class="card-portrait"></span><strong>管啸天</strong><small>从不骚扰她人</small><p>长卷发加眼镜，嘴硬但从不骚扰别人。</p></button>
+            <button class="character-card selected" data-character="baiyunfeng" style="--hair:#1d1a19;--coat:#8b8b8f;--shirt:#2b2b2e"><span class="card-portrait"></span><strong>白云峰</strong><small>疼痛部主唱</small><p>灰毛衣、蓬乱中长发、方框眼镜，手里总揀着一瓶酒。</p></button>
+            <button class="character-card" data-character="guanxiaotian" style="--hair:#1b1b1d;--coat:#e0d5bd;--shirt:#c6c6c2"><span class="card-portrait"></span><strong>管啸天</strong><small>上学标兵</small><p>米色抓绒、短乱发齐刘海、圆框眼镜，嘴硬但不太敢看别人。</p></button>
           </div>
           <div class="scene-actions"><button id="backToMenu">返回主菜单</button><button class="primary" id="confirmCharacter">确认角色</button></div>
         </section>
@@ -147,12 +187,51 @@
           <div class="result-actions"><button id="retryFight">重新挑战</button><button class="primary" id="returnMenu">返回主菜单</button></div>
         </section>
     <div class="cinematic-panel" id="cinematicPanel" hidden aria-live="polite"><p class="cinematic-speaker" id="cinematicSpeaker">疼痛部 · 深夜现场</p><h2 id="cinematicTitle">舞台待机</h2><p class="cinematic-text" id="cinematicText">红色灯光穿过薄雾，台下的喧闹声渐渐停了下来。</p><p class="cinematic-hint" id="cinematicHint">演出自动播放 · 点击或空格跳过</p><div class="cinematic-actions"><button id="cinematicNext">跳到战斗</button><button id="skipStory">跳过演出</button></div></div>
+    <div class="conn-badge" id="connBadge" hidden>未连接</div>
+    <section class="online-panel" id="onlinePanel" hidden aria-label="在线对战">
+      <h2>在线对战</h2>
+      <div class="online-row">
+        <input id="serverUrl" placeholder="服务器地址，例如 https://xxx.onrender.com" />
+        <button id="connectServer">连接服务器</button>
+      </div>
+      <div class="online-row">
+        <input id="playerNameInput" maxlength="12" placeholder="你的昵称" value="摇滚战士" />
+        <button class="primary" id="createRoom">创建房间</button>
+      </div>
+      <div class="online-row">
+        <input id="roomCodeInput" maxlength="6" placeholder="输入 4 位房间号" />
+        <button id="joinRoom">加入房间</button>
+      </div>
+      <div class="room-code" id="roomCodeBox" hidden>
+        <span>房间号</span><b id="roomCodeText">----</b>
+        <button id="copyInvite">复制邀请链接</button>
+      </div>
+      <div class="slot-list" id="slotList"></div>
+      <div class="online-row">
+        <button class="primary" id="readyBtn" hidden>准备</button>
+        <button id="leaveRoom" hidden>离开房间</button>
+        <button id="backFromOnline">返回主菜单</button>
+      </div>
+      <p class="online-note" id="onlineNote">把邀请链接发给朋友，他打开后会自动填入房间号，点「加入房间」即可。双方都点「准备」后 3、2、1 开打。</p>
+    </section>
+
+    <div class="countdown-panel" id="countdownPanel" hidden><b id="countdownText">3</b></div>
+
+    <section class="online-panel" id="disconnectPanel" hidden aria-label="连接中断">
+      <h2>连接中断</h2>
+      <p class="online-note" id="disconnectText">与服务器的连接已断开。</p>
+      <div class="online-row">
+        <button class="primary" id="reconnectBtn">重新连接</button>
+        <button id="backLobbyBtn">返回大厅</button>
+      </div>
+    </section>
+
     <div class="flash" id="story" aria-live="assertive"><span id="storyText">全场，跟上节拍！</span></div>
     <div class="flash" id="victory" aria-live="assertive"><span id="winText">胜利<small>FIGHT COMPLETE</small></span></div>
     <div class="blackout" id="blackout" hidden></div>
   </section>
   <footer>
-    <div class="moves"><button class="key" data-move="left">A</button><button class="key" data-move="right">D</button><span>移动</span><span class="sep"></span><button class="key" data-move="left">←</button><button class="key" data-move="right">→</button></div>
+    <div class="moves"><button class="key" data-move="left">A</button><button class="key" data-move="right">D</button><button class="key" data-move="up">W</button><button class="key" data-move="down">S</button><span>移动</span><span class="sep"></span><button class="key" data-move="jump">空格</button><span>跳跃</span></div>
     <div class="attacks">
       <button class="attack" data-attack="punch"><span class="attack-key">J</span><span><b>流水攻击</b><small>近身 · 快速</small></span></button>
       <button class="attack" data-attack="beat"><span class="attack-key">K</span><span><b>桂花飘满天</b><small>远程 · 连打</small></span></button>
@@ -160,7 +239,7 @@
     </div>
     <button class="restart" id="restart" title="重新开始" aria-label="重新开始">↻</button>
   </footer>
-  <p class="mobile-note">键盘：A / D 或方向键移动，J / K / L 攻击</p>
+  <p class="mobile-note">键盘：A/D 左右，W/S 上下(纵深)，空格跳跃，J/K/L 攻击</p>
 </main>
 <script>
 (() => {
@@ -174,18 +253,20 @@
     baiyunfeng: {
       punch: { name:'流水攻击', damage:8, reach:150, cooldown:.32, windup:.1, duration:.34, color:'#4fc3f7' },
       beat:  { name:'桂花飘满天', damage:13, reach:390, cooldown:.7, windup:.19, duration:.56, color:'#f5d76a' },
-      super: { name:'广岛之恋', damage:30, reach:455, cooldown:1.3, windup:.4, duration:.9, color:'#8ecbff' }
+      super: { name:'广岛之恋', damage:30, reach:455, cooldown:1.3, windup:.4, duration:.9, color:'#8ecbff' },
+      vomit: { name:'呕吐攻击', damage:50, reach:190, cooldown:2.5, windup:.25, duration:.6, color:'#9be36a' }
     },
     guanxiaotian: {
       punch: { name:'真爱四则', damage:8, reach:150, cooldown:.32, windup:.1, duration:.34, color:'#ff8ab0' },
       beat:  { name:'三道杠大队长', damage:13, reach:390, cooldown:.7, windup:.19, duration:.56, color:'#e53935' },
-      super: { name:'你的女朋友我也很喜欢', damage:30, reach:455, cooldown:1.3, windup:.4, duration:.9, color:'#ce93d8' }
+      super: { name:'你的女朋友我也很喜欢', damage:30, reach:455, cooldown:1.3, windup:.4, duration:.9, color:'#ce93d8' },
+      vomit: { name:'呕吐攻击', damage:50, reach:190, cooldown:2.5, windup:.25, duration:.6, color:'#9be36a' }
     }
   };
   const CHARACTERS = {
-    baiyunfeng: { id:'baiyunfeng', name:'白云峰', role:'疼痛部主唱', hair:'#26282b', coat:'#e8e2d4', shirt:'#2e3033', accent:'#d7cdbd',
+    baiyunfeng: { id:'baiyunfeng', name:'白云峰', role:'疼痛部主唱', hair:'#1d1a19', coat:'#8b8b8f', shirt:'#2b2b2e', accent:'#c9c9cc',
       dialogue:[['白云峰','后台走廊','观众已经到齐，今晚就用音乐决定谁留在主舞台。'],['管啸天','灯光下','那就别让节拍停下来。'],['白云峰','拿起麦克风','准备好了，开场！']] },
-    guanxiaotian: { id:'guanxiaotian', name:'管啸天', role:'从不骚扰她人', hair:'#1b1d1f', coat:'#6e7480', shirt:'#9aa1ab', accent:'#c8cdd4',
+    guanxiaotian: { id:'guanxiaotian', name:'管啸天', role:'从不骚扰她人', hair:'#1b1b1d', coat:'#e0d5bd', shirt:'#c6c6c2', accent:'#efe6d2',
       dialogue:[['管啸天','后台走廊','低音已经就位，今晚的舞台属于最稳的节奏。'],['白云峰','灯光下','那就用歌声接招。'],['管啸天','拨响琴弦','一、二、三、四！']] }
   };
   const DIALOGUE_BEATS = {
@@ -194,8 +275,9 @@
   let audioContext = null;
   let musicTimer = null;
   const s = {
-    mode:'menu', playerX:205, enemyX:724, hp:100, playerHp:100, selectedCharacter:'baiyunfeng', dialogueIndex:0, attack:null, cooldown:0,
+    mode:'menu', playerX:205, enemyX:724, hp:100, playerHp:100, playerDrunk:0, enemyDrunk:0, playerZ:0, enemyZ:0, playerJump:0, playerVy:0, selectedCharacter:'baiyunfeng', dialogueIndex:0, attack:null, cooldown:0,
     hitStun:0, enemyDown:0, thresholdDone:false, victoryDone:false, storyTimer:0, elapsed:0,
+    items:[], itemTimer:0, nextItemId:1,
     blinkTimer:2.2, blink:0, playerFlash:0, shake:0, combo:0, comboTimer:0,
     cinematicPhase:'empty', cinematicTimer:0, cameraZoom:1,
     particles:[], texts:[], last:0
@@ -209,6 +291,14 @@
   function hud() {
     $('pText').textContent = String(s.playerHp); $('eText').textContent = String(s.hp);
     $('pFill').style.width = `${s.playerHp}%`; $('eFill').style.width = `${s.hp}%`;
+    $('pDrunk').style.width = `${Math.max(0, Math.min(100, s.playerDrunk || 0))}%`;
+    $('eDrunk').style.width = `${Math.max(0, Math.min(100, s.enemyDrunk || 0))}%`;
+    const pD = Math.round(s.playerDrunk || 0), eD = Math.round(s.enemyDrunk || 0);
+    $('pDrunkNum').textContent = `醉 ${pD}%`; $('eDrunkNum').textContent = `醉 ${eD}%`;
+    $('pDrunkNum').classList.toggle('full', pD >= 100);
+    $('eDrunkNum').classList.toggle('full', eD >= 100);
+    const hint = $('vomitHint');
+    if (hint) hint.hidden = pD < 100;
     $('playerName').textContent=selectedCharacter().name; $('playerCaption').textContent=selectedCharacter().role;
     $('enemyName').textContent=opponentCharacter().name;
     updateAttackLabels();
@@ -317,7 +407,7 @@
   function advanceCinematic() { if(s.mode==='cinematic') skipCinematic(); }
   function startFight() {
     stopMusic(); moves.clear();
-    Object.assign(s,{mode:'playing',playerX:205,enemyX:724,hp:100,playerHp:100,attack:null,cooldown:0,hitStun:0,
+    Object.assign(s,{mode:'playing',playerX:205,enemyX:724,hp:100,playerHp:100,playerDrunk:0,enemyDrunk:0,playerZ:0,enemyZ:0,playerJump:0,playerVy:0,items:[],itemTimer:4500,nextItemId:1,attack:null,cooldown:0,hitStun:0,
       thresholdDone:false,victoryDone:false,storyTimer:0,elapsed:0,blink:0,playerFlash:0,shake:0,
       combo:0,comboTimer:0,enemyDown:0,cinematicTimer:0,cameraZoom:1,particles:[],texts:[]});
     $('cinematicPanel').hidden=true; $('cinematicPanel').classList.remove('countdown','callout');
@@ -327,7 +417,7 @@
   }
   function restart() {
     stopMusic(); moves.clear();
-    Object.assign(s,{mode:'menu',playerX:205,enemyX:724,hp:100,playerHp:100,attack:null,cooldown:0,hitStun:0,
+    Object.assign(s,{mode:'menu',playerX:205,enemyX:724,hp:100,playerHp:100,playerDrunk:0,enemyDrunk:0,playerZ:0,enemyZ:0,playerJump:0,playerVy:0,items:[],itemTimer:4500,nextItemId:1,attack:null,cooldown:0,hitStun:0,
       thresholdDone:false,victoryDone:false,storyTimer:0,elapsed:0,blink:0,playerFlash:0,shake:0,
       combo:0,comboTimer:0,enemyDown:0,cinematicPhase:'empty',cinematicTimer:0,cameraZoom:1,particles:[],texts:[]});
     $('intro').classList.remove('hidden'); $('selectPanel').hidden=true; $('dialoguePanel').hidden=true; $('resultPanel').hidden=true; $('cinematicPanel').hidden=true;
@@ -354,6 +444,8 @@
     });
   }
   function attack(type) {
+    // 联机模式下只上报攻击意图，命中与伤害由服务器裁决
+    if (online.active) { if (window.RockFightNet) window.RockFightNet.pressAttack(type); return; }
     if (s.mode!=='playing' || s.cooldown>0 || s.attack) return;
     const skills = CHARACTER_SKILLS[s.selectedCharacter];
     s.attack={type,data:skills[type],time:0,hit:false}; s.cooldown=skills[type].cooldown; s.playerFlash=.12;
@@ -375,7 +467,12 @@
     if (s.enemyX-s.playerX<=0 || s.enemyX-s.playerX>a.data.reach) {
       emitParticles(s.playerX+80,FLOOR-92,a.data.color,9,.7); s.texts.push({x:s.playerX+95,y:FLOOR-130,text:'MISS!',color:'#f5eddb',life:.7}); return;
     }
-    s.hp=Math.max(0,s.hp-a.data.damage);
+    if (Math.abs((s.playerZ||0)-(s.enemyZ||0))>70) {   // 纵深错位，打空
+      emitParticles(s.enemyX,FLOOR-92,a.data.color,9,.7); s.texts.push({x:s.enemyX,y:FLOOR-150,text:'纵深打空',color:'#f5eddb',life:.8}); return;
+    }
+    const dmg = a.type==='vomit' ? a.data.damage : Math.round(a.data.damage*(1+(s.playerDrunk||0)*0.01));  // 饮酒值越高伤害越高
+    s.hp=Math.max(0,s.hp-dmg);
+    if (a.type==='vomit') { s.playerDrunk = 0; hud(); }   // 吐完清醒，避免无限连发
     $('eGhost').style.width=`${before}%`; requestAnimationFrame(()=>$('eGhost').style.width=`${s.hp}%`);
     s.hitStun=a.type==='super'?.65:.38; s.blink=.18; s.enemyX=Math.min(W-125,s.enemyX+(a.type==='super'?22:9));
     if (a.type==='punch' && s.selectedCharacter==='baiyunfeng') { s.enemyDown=1.1; s.texts.push({x:s.enemyX,y:FLOOR-200,text:'摔倒!',color:'#4fc3f7',life:.9}); }
@@ -384,6 +481,12 @@
     if (!s.thresholdDone && before>50 && s.hp<=50) {
       s.thresholdDone=true; s.mode='story'; s.attack=null; s.storyTimer=2.8; $('story').classList.add('show'); burst(W*.52,H*.48,true); hud(); return;
     }
+    if (online.active) {
+      // 联机：本地不做任何战斗模拟，画面与数值完全以服务器快照为准
+      s.shake=Math.max(0,s.shake-35*dt); s.hitStun=Math.max(0,s.hitStun-dt); s.blink=Math.max(0,s.blink-dt);
+      stepParticles(dt); return;
+    }
+   
     if (s.hp===0) win();
   }
   function update(dt) {
@@ -427,16 +530,61 @@
       s.storyTimer-=dt;
       if (s.storyTimer<=0) { s.mode='playing'; $('story').classList.remove('show'); hud(); if (s.hp===0) win(); }
     }
+    const drunkN = Math.min(100, s.playerDrunk || 0);
+    const speedMul = 1 - Math.min(0.5, drunkN * 0.004);      // 饮酒越多越慢（最多 -50%）
     if (s.mode==='playing' && !s.attack && s.hitStun<=0) {
       const left=moves.has('a')||moves.has('arrowleft'), right=moves.has('d')||moves.has('arrowright');
-      if (left!==right) s.playerX=Math.max(70,Math.min(s.enemyX-58,s.playerX+(right?1:-1)*250*dt));
+      if (left!==right) s.playerX=Math.max(70,Math.min(s.enemyX-58,s.playerX+(right?1:-1)*250*speedMul*dt));
+      // 纵深（画面上的上/下）：走到对方攻击纵深之外会打空
+      const up=moves.has('w')||moves.has('arrowup'), down=moves.has('s')||moves.has('arrowdown');
+      if (up!==down) s.playerZ=Math.max(-130,Math.min(130,(s.playerZ||0)+(down?1:-1)*200*speedMul*dt));
     }
+    // 酒满不再判负，而是解锁呕吐攻击（见 tryVomit / J+K）
+    // 跳跃（本地）
+    if ((s.playerJump||0)>0 || (s.playerVy||0)>0) {
+      s.playerJump=(s.playerJump||0)+(s.playerVy||0)*dt;
+      s.playerVy=(s.playerVy||0)-1500*dt;
+      if (s.playerJump<=0) { s.playerJump=0; s.playerVy=0; }
+    }
+    stepLocalItems(dt);
     if (s.attack && s.mode==='playing') {
       s.attack.time+=dt;
       if (!s.attack.hit && s.attack.time>=s.attack.data.windup) { s.attack.hit=true; resolveHit(s.attack); }
       if (s.attack && s.attack.time>=s.attack.data.duration) s.attack=null;
     }
     s.blinkTimer-=dt; if (s.blinkTimer<=0) { s.blink=Math.max(s.blink,.12); s.blinkTimer=2+Math.random()*3; }
+    stepParticles(dt);
+  }
+  /** 单机道具：定期刷新啤酒瓶/shot，走过去拾取提升饮酒值（饮酒值越高伤害越高） */
+  function stepLocalItems(dt) {
+    if (online.active || s.mode!=='playing') return;
+    const cfgItem = { spawnEveryMs:7000, maxOnStage:3, beer:12, shot:20 };
+    s.itemTimer = (s.itemTimer||0) + dt*1000;
+    if (s.itemTimer >= cfgItem.spawnEveryMs && (s.items||[]).length < cfgItem.maxOnStage) {
+      s.itemTimer = 0;
+      const behind = s.playerHp + 20 <= s.hp;                 // 玩家落后 → 更容易出啤酒翻盘
+      const kind = (behind && Math.random() < 0.75) ? 'beer' : (Math.random() < 0.5 ? 'beer' : 'shot');
+      const weak = behind ? s.playerX : s.enemyX;
+      const x = Math.random() < 0.7
+        ? Math.max(90, Math.min(870, weak + (Math.random()*2-1)*170))
+        : 90 + Math.random()*780;
+      const z = (Math.random()*2-1) * 110;
+      s.items.push({ id: s.nextItemId++, kind, x, z });
+      emitParticles(x, FLOOR-70, kind==='beer' ? '#f0c24b' : '#fff3b0', 12, .8);
+    }
+    for (let i=(s.items||[]).length-1;i>=0;i--) {
+      const it = s.items[i];
+      if (Math.abs(it.x - s.playerX) <= 48 && Math.abs((it.z||0) - (s.playerZ||0)) <= 48) {
+        const add = it.kind === 'beer' ? cfgItem.beer : cfgItem.shot;
+        s.playerDrunk = Math.min(100, (s.playerDrunk||0) + add);
+        s.texts.push({x:it.x,y:FLOOR-155,text:`+${add} 饮酒`,color:'#f0c24b',life:1});
+        emitParticles(it.x, FLOOR-80, '#f0c24b', 16, .9);
+        s.items.splice(i,1);
+        hud();
+      }
+    }
+  }
+  function stepParticles(dt) {
     for (let i=s.particles.length-1;i>=0;i--) { const p=s.particles[i]; p.life-=dt; p.x+=p.vx*60*dt; p.y+=p.vy*60*dt; p.vy+=p.gravity*dt; if (p.life<=0) s.particles.splice(i,1); }
     for (let i=s.texts.length-1;i>=0;i--) { const t=s.texts[i]; t.life-=dt; t.y-=44*dt; if (t.life<=0) s.texts.splice(i,1); }
   }
@@ -492,7 +640,7 @@
     const character=selectedCharacter(), x=s.playerX, bob=s.mode==='playing'&&!s.attack?Math.sin(s.elapsed*7)*3:0;
     ctx.save(); ctx.translate(x,FLOOR-5+bob);
     ctx.fillStyle='#0006'; ctx.beginPath(); ctx.ellipse(0,0,45,9,0,0,Math.PI*2); ctx.fill();
-    if (character.id!=='baiyunfeng') {
+    if (character.id==='baiyunfeng') {
       ctx.fillStyle=character.hair; ctx.beginPath(); ctx.moveTo(-28,-151); ctx.quadraticCurveTo(-38,-177,-10,-184); ctx.quadraticCurveTo(22,-188,32,-157); ctx.lineTo(38,-75); ctx.lineTo(26,-88); ctx.lineTo(17,-59); ctx.lineTo(4,-88); ctx.lineTo(-8,-63); ctx.lineTo(-22,-92); ctx.lineTo(-35,-72); ctx.lineTo(-38,-125); ctx.closePath(); ctx.fill();
     }
     roundRect(-26,-78,22,73,7,'#27292a'); roundRect(5,-78,22,73,7,'#252729');
@@ -514,7 +662,7 @@
     }
     ctx.restore();
     ctx.fillStyle='#d39672'; ctx.beginPath(); ctx.arc(0,-146,33,0,Math.PI*2); ctx.fill();
-    if (character.id==='baiyunfeng') {
+    if (character.id==='guanxiaotian') {
       ctx.fillStyle=character.hair; ctx.beginPath();
       ctx.moveTo(-28,-158); ctx.lineTo(-25,-174); ctx.lineTo(-18,-159); ctx.lineTo(-12,-177); ctx.lineTo(-6,-159);
       ctx.lineTo(0,-179); ctx.lineTo(6,-159); ctx.lineTo(12,-177); ctx.lineTo(18,-159); ctx.lineTo(25,-174); ctx.lineTo(28,-157);
@@ -595,6 +743,13 @@
           ctx.fillStyle='#fff3b0'; ctx.font='1000 18px sans-serif'; ctx.fillText('三道杠大队长!!',s.playerX+60,FLOOR-186);
           ctx.fillStyle='#c8f7c5'; ctx.font='1000 15px sans-serif'; ctx.fillText('上学标兵!',s.playerX+150,FLOOR-164);
         }
+      } else if (a.type==='vomit') {   // 呕吐攻击：朝对方吐，固定 50
+        const vx=s.playerX+70+p*160;
+        ctx.fillStyle='#9be36a';
+        for(let i=0;i<14;i++){ ctx.beginPath();
+          ctx.arc(vx+i*7, FLOOR-120+Math.sin(i*1.7+p*6)*24, 8+i*0.7, 0, Math.PI*2); ctx.fill(); }
+        ctx.fillStyle='#c7f27a'; ctx.font='1000 26px sans-serif'; ctx.fillText('呕——!!', s.playerX+95, FLOOR-172);
+        ctx.fillStyle='#fff'; ctx.font='1000 22px sans-serif'; ctx.fillText('-50', s.enemyX-14, FLOOR-205);
       } else {
         if (isBaiyun) { // 大招：广岛之恋 —— 朝对手扔出巨大可乐瓶
           ctx.fillStyle='#ffe04b'; ctx.font='1000 24px sans-serif'; ctx.fillText('广岛之恋!!',s.playerX+70,FLOOR-214);
@@ -625,15 +780,148 @@
     for(const p of s.particles){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*Math.min(1,p.life*2),0,Math.PI*2);ctx.fill();}
     ctx.globalAlpha=1; for(const t of s.texts){ctx.globalAlpha=Math.min(1,t.life*2);ctx.textAlign='center';ctx.font='1000 28px sans-serif';ctx.lineWidth=5;ctx.strokeStyle='#172022';ctx.strokeText(t.text,t.x,t.y);ctx.fillStyle=t.color;ctx.fillText(t.text,t.x,t.y);}ctx.globalAlpha=1;
   }
+  function activeItems() { return online.active ? (online.items || []) : (s.items || []); }
+  function drawItems() {
+    const items = activeItems();
+    if (!items.length) return;
+    for (const item of items) {
+      ctx.save(); ctx.translate(item.x, FLOOR - 8);
+      ctx.fillStyle='#0007'; ctx.beginPath(); ctx.ellipse(0,4,16,4,0,0,Math.PI*2); ctx.fill();
+      if (item.kind === 'beer') { ctx.fillStyle='#7a5a34'; ctx.fillRect(-9,-34,18,34); ctx.fillStyle='#e9dfc8'; ctx.fillRect(-9,-34,18,10); }
+      else { ctx.fillStyle='#c9a227'; ctx.fillRect(-7,-24,14,24); ctx.fillStyle='#fff3b0'; ctx.fillRect(-7,-24,14,7); }
+      ctx.fillStyle='#fff3b0'; ctx.font='900 10px sans-serif'; ctx.textAlign='center';
+      ctx.fillText(item.kind === 'beer' ? '啤' : 'SHOT', 0, 16); ctx.restore();
+    }
+  }
+  // ===== 3D / 2D 渲染切换（3D 只负责画，数值仍来自既有逻辑与服务器）=====
+  let use3D = false;
+  let want3D = true;
+  function getRenderState() {
+    const snap = online.snap;
+    const mine = snap ? snap.fighters.find((f) => f.id === online.myId) : null;
+    const other = snap ? snap.fighters.find((f) => f.id !== online.myId) : null;
+    const skills = CHARACTER_SKILLS[s.selectedCharacter] || {};
+    const attackOf = (atk) => {
+      if (!atk) return null;
+      const spec = skills[atk.type];
+      const progress = atk.phase ? (atk.phase === 'windup' ? .2 : atk.phase === 'active' ? .6 : .95) : 1;
+      return { color: spec ? spec.color : '#ffffff', progress };
+    };
+    const localAttack = s.attack ? { color: s.attack.data.color, progress: Math.min(1, s.attack.time / s.attack.data.duration) } : null;
+    return {
+      t: s.elapsed,
+      shake: s.shake,
+      items: activeItems(),
+      characters: { self: selectedCharacter(), opp: opponentCharacter() },
+      self: {
+        x: s.playerX, y: FLOOR - (s.playerJump || 0), z: s.playerZ || 0, facing: mine ? mine.facing : 1,
+        drunk: s.playerDrunk || 0, hitStun: s.hitStun,
+        stumbled: mine ? mine.stumbled : (s.mode === 'lost'), moving: moves.size > 0,
+        attack: mine ? attackOf(mine.attack) : localAttack
+      },
+      opp: {
+        x: s.enemyX, y: other ? other.y : FLOOR, z: other ? (other.z || 0) : (s.enemyZ || 0),
+        facing: other ? other.facing : -1,
+        drunk: s.enemyDrunk || 0, hitStun: other ? other.stun : 0,
+        stumbled: other ? other.stumbled : s.mode === 'won',
+        moving: false, attack: other ? attackOf(other.attack) : null
+      }
+    };
+  }
+  function applyRenderMode() {
+    const box = $('use3D'), c3d = $('arena3d'), c2d = $('arena');
+    if (box) want3D = box.checked;      // 记录用户意愿，不被回退覆盖
+    use3D = want3D;
+    if (use3D) {
+      if (!window.RockFight3D || !window.RockFight3D.init(c3d)) {
+        use3D = false;                   // 本次先回退 2D，等脚本就绪后重试
+        if (c3d) c3d.hidden = true;
+        if (c2d) c2d.style.visibility = 'visible';
+        return;
+      }
+      c3d.hidden = false;
+      if (c2d) c2d.style.visibility = 'visible';   // 保留 2D 画布作为特效叠加层
+      window.RockFight3D.resize();
+    } else {
+      if (c3d) c3d.hidden = true;
+      if (c2d) c2d.style.visibility = 'visible';
+    }
+  }
+  function nameLabels() {
+    label(`${selectedCharacter().name} / ${selectedCharacter().role}`, s.playerX, FLOOR - 205);
+    label(opponentCharacter().name, s.enemyX, FLOOR - 193);
+  }
   function render() {
+    if (use3D && window.RockFight3D && window.RockFight3D.ready) {
+      const now = performance.now();
+      const dt = Math.min(.05, s.last3D ? (now - s.last3D) / 1000 : .016);
+      s.last3D = now;
+      window.RockFight3D.render(getRenderState(), dt);
+      // 在 3D 画面上叠加原有 2D 特效（涂鸦、水花、桂花、可乐瓶、三道杠、精神攻击…全部保留）
+      ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      ctx.translate(W/2,H/2); ctx.scale(s.cameraZoom, s.cameraZoom); ctx.translate(-W/2,-H/2);
+      if (s.shake>0) ctx.translate((Math.random()-.5)*s.shake,(Math.random()-.5)*s.shake);
+      effects();
+      nameLabels();
+      ctx.restore();
+      return;
+    }
     ctx.save(); ctx.translate(W/2,H/2); ctx.scale(s.cameraZoom, s.cameraZoom); ctx.translate(-W/2,-H/2);
     if(s.shake>0)ctx.translate((Math.random()-.5)*s.shake,(Math.random()-.5)*s.shake);
-    backdrop(); hero(); october(); effects(); ctx.restore();
+    backdrop(); drawItems(); hero(); october(); effects(); ctx.restore();
   }
+
+  // ===== 在线对战适配层（服务器权威，本地只做输入上报与画面呈现）=====
+  const online = { active:false, myId:null, snap:null, items:[], winnerId:null, finished:false };
+  function applyOnlineSnapshot(snap) {
+    online.snap = snap; online.items = snap.items || [];
+    online.finished = !!snap.finished; online.winnerId = snap.winnerId;
+    const mine = snap.fighters.find((f) => f.id === online.myId);
+    const other = snap.fighters.find((f) => f.id !== online.myId);
+    if (!mine || !other) return;
+    s.mode = 'playing';
+    s.playerX = mine.x; s.enemyX = other.x;
+    s.playerHp = mine.hp; s.hp = other.hp;
+    s.playerDrunk = mine.drunk; s.enemyDrunk = other.drunk;
+    s.hitStun = other.stun > 0 ? other.stun : 0;
+    s.blink = other.stumbled ? .18 : 0;
+    const skills = CHARACTER_SKILLS[s.selectedCharacter];
+    const progress = (atk) => (atk.phase === 'windup' ? .35 : atk.phase === 'active' ? .7 : .95);
+    s.attack = (mine.attack && skills[mine.attack.type])
+      ? { type: mine.attack.type, data: skills[mine.attack.type], time: progress(mine.attack) * skills[mine.attack.type].duration, hit: true }
+      : null;
+    hud();
+  }
+  window.RockFightGame = {
+    moves,
+    online,
+    applySnapshot: applyOnlineSnapshot,
+    setMyId: (id) => { online.myId = id; },
+    setActive: (on) => { online.active = !!on; if (!on) { online.snap = null; online.items = []; } else { s.mode = 'playing'; } },
+    setCharacter: (id) => { if (CHARACTERS[id]) s.selectedCharacter = id; },
+    burst, emitParticles, setBattleControls,
+    hitEffect: (targetId, damage) => {
+      const snap = online.snap; if (!snap) return;
+      const f = snap.fighters.find((x) => x.id === targetId); if (!f) return;
+      burst(f.x, FLOOR - 113, false);
+      s.texts.push({ x: f.x, y: FLOOR - 165, text: `-${damage}`, color: '#ff4e83', life: .9 });
+    },
+    layout: () => { s.playerX = 220; s.enemyX = 740; },
+    refresh: () => hud(),
+    // 调试读数：确认纵深是否真的在变化
+    debug: () => ({ mode: s.mode, playerX: Math.round(s.playerX), playerZ: Math.round(s.playerZ || 0), playerJump: Math.round(s.playerJump || 0), drunk: Math.round(s.playerDrunk || 0), items: activeItems().map((i) => ({ kind: i.kind, x: Math.round(i.x), z: Math.round(i.z || 0) })), keys: [...moves] }),
+    // 调试用：直接设置饮酒值，便于测试“满酒呕吐”
+    setDrunk: (v) => { s.playerDrunk = Math.max(0, Math.min(100, v)); hud(); },
+    // 调试用：直接设置站位，便于测试距离相关的招式
+    setPos: (x, z) => { s.playerX = Math.max(70, Math.min(700, x)); s.playerZ = Math.max(-130, Math.min(130, z || 0)); hud(); }
+  };
   function frame(now) { const dt=Math.min(.035,s.last?(now-s.last)/1000:0);s.last=now;update(dt);render();requestAnimationFrame(frame); }
 
   document.addEventListener('keydown',(event)=>{
-    const key=event.key.toLowerCase(); if(['arrowleft','arrowright',' ','enter'].includes(key))event.preventDefault();
+    const tag=(event.target&&event.target.tagName)||'';
+    if(tag==='INPUT'||tag==='TEXTAREA') return;            // 输入框内不拦截按键
+    const key=event.key.toLowerCase(); if(['arrowleft','arrowright','arrowup','arrowdown',' ','enter'].includes(key))event.preventDefault();
     if (s.mode==='menu' && (key===' '||key==='enter')) { begin(); return; }
     if (s.mode==='select' && (key==='enter'||key===' ')) { showDialogue(); return; }
     if (s.mode==='dialogue' && (key===' '||key==='enter')) { if(!$('enterFight').hidden) beginArenaCinematic(); else advanceDialogue(); return; }
@@ -642,8 +930,10 @@
     if (s.mode==='select' && key==='escape') { returnToMenu(); return; }
     if (s.mode==='dialogue' && key==='escape') { setScene('select'); return; }
     if (s.mode!=='playing') return;
-    if(['a','d','arrowleft','arrowright'].includes(key))moves.add(key);
-    if(!event.repeat&&key==='j')attack('punch'); if(!event.repeat&&key==='k')attack('beat'); if(!event.repeat&&key==='l')attack('super');
+    if(['a','d','w','s','arrowleft','arrowright','arrowup','arrowdown'].includes(key))moves.add(key);
+    if(!event.repeat&&key===' ') jumpOrReport();
+    if(!event.repeat&&(key==='j'||key==='k')) attackKeyCombo(key);
+    if(!event.repeat&&key==='l')attack('super');
   });
   document.addEventListener('keyup',(event)=>moves.delete(event.key.toLowerCase())); window.addEventListener('blur',()=>moves.clear());
   window.addEventListener('resize',fit); $('start').addEventListener('click',begin); $('restart').addEventListener('click',returnToMenu);
@@ -653,11 +943,223 @@
   $('enterFight').addEventListener('click',beginArenaCinematic); $('retryFight').addEventListener('click',startFight); $('returnMenu').addEventListener('click',returnToMenu);
   $('cinematicNext').addEventListener('click',advanceCinematic); $('skipStory').addEventListener('click',skipCinematic);
   document.querySelectorAll('.attack').forEach((button)=>button.addEventListener('click',()=>attack(button.dataset.attack)));
+  let lastAtkKey = null, lastAtkTime = 0;
+  /** J+K 同时按（160ms 内）→ 呕吐攻击 */
+  function attackKeyCombo(key) {
+    const now = performance.now();
+    if (lastAtkKey && lastAtkKey !== key && now - lastAtkTime <= 160) { lastAtkKey = null; tryVomit(); return; }
+    lastAtkKey = key; lastAtkTime = now;
+    attack(key === 'j' ? 'punch' : 'beat');
+  }
+  function tryVomit() {
+    if (online.active) { if (window.RockFightNet) window.RockFightNet.pressAttack('vomit'); return; }
+    if ((s.playerDrunk||0) < 100) {
+      s.texts.push({ x:s.playerX+80, y:FLOOR-175, text:'酒还没喝满', color:'#f0c24b', life:.9 });
+      return;
+    }
+    s.attack = null; s.cooldown = 0;      // 取消刚触发的普通攻击，让呕吐立刻生效
+    attack('vomit');
+  }
+  function jumpOrReport() {
+    // 联机交给服务器裁决；单机本地模拟跳跃
+    if (online.active) { if (window.RockFightNet) window.RockFightNet.jump(); return; }
+    if ((s.playerJump||0)<=0) s.playerVy=520;
+  }
   document.querySelectorAll('[data-move]').forEach((button)=>{
-    const key=button.dataset.move==='left'?'arrowleft':'arrowright'; const down=(event)=>{event.preventDefault();if(s.mode==='playing')moves.add(key);}; const up=()=>moves.delete(key);
+    const MOVE_KEY={ left:'arrowleft', right:'arrowright', up:'arrowup', down:'arrowdown', jump:' ' };
+    const key=MOVE_KEY[button.dataset.move]||'arrowright';
+    const down=(event)=>{ event.preventDefault(); if(s.mode!=='playing') return;
+      if(key===' '){ jumpOrReport(); return; }
+      moves.add(key); };
+    const up=()=>moves.delete(key);
     button.addEventListener('pointerdown',down); ['pointerup','pointerleave','pointercancel'].forEach((type)=>button.addEventListener(type,up));
   });
+  $('use3D').addEventListener('change', applyRenderMode);
+  window.addEventListener('resize', () => { if (use3D && window.RockFight3D) window.RockFight3D.resize(); });
   fit(); hud(); setBattleControls(false); requestAnimationFrame(frame);
+  applyRenderMode();
+  window.addEventListener('load', applyRenderMode);
+})();
+</script>
+<script src="three.min.js"></script>
+<script src="render3d.js"></script>
+<script src="netClient.js"></script>
+<script>
+/* ===== 在线对战控制器：房间 / 准备 / 倒计时 / 快照 / 断线重连 ===== */
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const NET = window.RockFightNet;
+  const GAME = window.RockFightGame;
+  const params = new URLSearchParams(location.search);
+  let ready = false;
+  let countdownTimer = null;
+
+  const inviteLink = () => {
+    const q = new URLSearchParams();
+    if (NET.getServerUrl()) q.set('server', NET.getServerUrl());
+    if (NET.room) q.set('room', NET.room.code);
+    return `${location.origin}${location.pathname}?${q.toString()}`;
+  };
+
+  function showBadge(state, text) {
+    const badge = $('connBadge');
+    badge.hidden = false; badge.dataset.state = state; badge.textContent = text;
+  }
+
+  function renderSlots(room) {
+    const list = $('slotList');
+    list.innerHTML = '';
+    const total = room ? room.maxPlayers : 2;
+    for (let i = 0; i < total; i += 1) {
+      const div = document.createElement('div');
+      const p = room ? room.players[i] : null;
+      if (!p) { div.className = 'slot empty'; div.textContent = '等待玩家加入…'; }
+      else {
+        div.className = 'slot';
+        const tags = [];
+        if (room.you === p.id) tags.push('<span class="tag you">你</span>');
+        tags.push(p.ready ? '<span class="tag ready">已准备</span>' : '<span class="tag">未准备</span>');
+        tags.push(p.connected ? '<span class="tag">在线</span>' : '<span class="tag off">已断线</span>');
+        div.innerHTML = `<span class="slot-name">${p.name}</span>${tags.join('')}`;
+      }
+      list.appendChild(div);
+    }
+  }
+
+  function showRoom(room) {
+    NET.room = room;
+    $('roomCodeBox').hidden = !room;
+    const inRoom = !!room;
+    $('readyBtn').hidden = !inRoom;
+    $('leaveRoom').hidden = !inRoom;
+    $('createRoom').disabled = inRoom;
+    $('joinRoom').disabled = inRoom;
+    if (inRoom) {
+      $('roomCodeText').textContent = room.code;
+      const me = room.players.find((p) => p.id === room.you);
+      ready = !!(me && me.ready);
+      $('readyBtn').textContent = ready ? '取消准备' : '准备';
+    }
+    renderSlots(room);
+  }
+
+  async function ensureConnected() {
+    if (NET.connected) return true;
+    const url = $('serverUrl').value.trim();
+    if (!url) { $('onlineNote').textContent = '请先填写服务器地址，例如 https://xxx.onrender.com'; return false; }
+    $('onlineNote').textContent = '正在连接服务器…';
+    try {
+      await NET.connect(url);
+      showBadge('connected', `已连接 ${NET.getServerUrl()}`);
+      $('onlineNote').textContent = '连接成功。可以创建房间或加入房间。';
+      return true;
+    } catch (err) {
+      showBadge('disconnected', '连接失败');
+      $('onlineNote').textContent = `连接失败：${err.message}`;
+      return false;
+    }
+  }
+
+  NET.on('connection', ({ state }) => {
+    if (state === 'connected') showBadge('connected', `已连接 ${NET.getServerUrl()}`);
+    else { showBadge('disconnected', '与服务器断开'); $('disconnectPanel').hidden = false; $('disconnectText').textContent = '与服务器的连接已断开。'; }
+  });
+  NET.on('room', showRoom);
+  NET.on('countdown', ({ ms }) => {
+    $('countdownPanel').hidden = false;
+    let remain = Math.ceil(ms / 1000);
+    $('countdownText').textContent = String(remain);
+    clearInterval(countdownTimer);
+    countdownTimer = setInterval(() => {
+      remain -= 1;
+      if (remain > 0) { $('countdownText').textContent = String(remain); $('countdownText').style.animation = 'none'; void $('countdownText').offsetWidth; $('countdownText').style.animation = ''; }
+      else clearInterval(countdownTimer);
+    }, 1000);
+  });
+  NET.on('cancelled', ({ reason }) => { clearInterval(countdownTimer); $('countdownPanel').hidden = true; $('onlineNote').textContent = `倒计时取消：${reason}`; });
+  NET.on('start', () => {
+    clearInterval(countdownTimer);
+    $('onlinePanel').hidden = true; $('disconnectPanel').hidden = true;
+    $('countdownText').textContent = 'FIGHT!';
+    $('countdownPanel').hidden = false;
+    setTimeout(() => { $('countdownPanel').hidden = true; }, 800);
+    if (NET.player) GAME.setMyId(NET.player.id);
+    GAME.setActive(true); GAME.layout(); GAME.setBattleControls(true);
+    NET.startInputLoop(30);
+    $('onlineNote').textContent = '战斗中：A/D 移动，J/K/L 攻击（命中由服务器判定）';
+  });
+  NET.on('snapshot', (snap) => GAME.applySnapshot(snap));
+  NET.on('events', (events) => {
+    for (const e of events) if (e.type === 'hit') GAME.hitEffect(e.targetId, e.damage);
+  });
+  NET.on('opponentGone', ({ name }) => {
+    $('disconnectText').textContent = `${name} 掉线了。可以等他重连，或返回大厅。`;
+    $('disconnectPanel').hidden = false;
+  });
+
+  // 把本地按键状态上报给服务器（服务器才是权威）
+  setInterval(() => {
+    if (!GAME.online.active) return;
+    NET.setInput('left', GAME.moves.has('a') || GAME.moves.has('arrowleft'));
+    NET.setInput('right', GAME.moves.has('d') || GAME.moves.has('arrowright'));
+    NET.setInput('up', GAME.moves.has('w') || GAME.moves.has('arrowup'));
+    NET.setInput('down', GAME.moves.has('s') || GAME.moves.has('arrowdown'));
+  }, 16);
+
+  $('openOnline').addEventListener('click', async () => {
+    $('intro').classList.add('hidden');
+    $('onlinePanel').hidden = false;
+    if (NET.getServerUrl()) $('serverUrl').value = NET.getServerUrl();
+    if (params.get('room')) $('onlineNote').textContent = `已从邀请链接填入房间号 ${params.get('room')}，点「加入房间」即可。`;
+    await ensureConnected().catch(() => {});
+  });
+  $('connectServer').addEventListener('click', () => ensureConnected());
+  $('createRoom').addEventListener('click', async () => {
+    if (!(await ensureConnected())) return;
+    try {
+      const room = await NET.createRoom($('playerNameInput').value);
+      $('onlineNote').textContent = `房间 ${room.code} 已创建。点「复制邀请链接」发给朋友。`;
+    } catch (err) { $('onlineNote').textContent = `创建失败：${err.message}`; }
+  });
+  $('joinRoom').addEventListener('click', async () => {
+    if (!(await ensureConnected())) return;
+    const code = $('roomCodeInput').value.trim();
+    if (!code) { $('onlineNote').textContent = '请输入房间号'; return; }
+    try {
+      const room = await NET.joinRoom(code, $('playerNameInput').value);
+      $('onlineNote').textContent = `已加入房间 ${room.code}。双方都点「准备」后开打。`;
+    } catch (err) { $('onlineNote').textContent = `加入失败：${err.message}`; }
+  });
+  $('copyInvite').addEventListener('click', async () => {
+    const link = inviteLink();
+    try { await navigator.clipboard.writeText(link); $('onlineNote').textContent = `邀请链接已复制：${link}`; }
+    catch (_) { $('onlineNote').textContent = `复制失败，请手动复制：${link}`; }
+  });
+  $('readyBtn').addEventListener('click', () => {
+    ready = !ready;
+    NET.setReady(ready);
+    $('readyBtn').textContent = ready ? '取消准备' : '准备';
+  });
+  $('leaveRoom').addEventListener('click', () => {
+    NET.leave(); NET.stopInputLoop(); GAME.setActive(false);
+    showRoom(null); $('countdownPanel').hidden = true;
+    $('onlineNote').textContent = '已离开房间。';
+  });
+  $('backFromOnline').addEventListener('click', () => {
+    $('onlinePanel').hidden = true; $('intro').classList.remove('hidden');
+  });
+  $('reconnectBtn').addEventListener('click', async () => {
+    if (await ensureConnected()) { await NET.tryAutoRejoin(); $('disconnectPanel').hidden = true; }
+  });
+  $('backLobbyBtn').addEventListener('click', () => {
+    NET.leave(); NET.stopInputLoop(); GAME.setActive(false);
+    $('disconnectPanel').hidden = true; $('onlinePanel').hidden = false;
+    showRoom(null);
+  });
+
+  if (NET.getServerUrl()) $('serverUrl').value = NET.getServerUrl();
+  if (params.get('room')) $('roomCodeInput').value = params.get('room');
 })();
 </script>
 </body>
