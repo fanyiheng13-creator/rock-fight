@@ -1,0 +1,17 @@
+# Render.com 部署配置（免费套餐支持 WebSocket 长连接）
+# 用法：把本文件放在仓库根目录，Render 选择 "Blueprint" 即可自动创建服务
+services:
+  - type: web
+    name: rock-fight-server
+    runtime: node
+    plan: free
+    buildCommand: npm install --no-fund --no-audit
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # 若前端部署在别处（例如 GitHub Pages），把这里换成你的前端域名
+      # 留空或设为 * 表示允许任意来源
+      - key: ALLOWED_ORIGIN
+        value: "*"
