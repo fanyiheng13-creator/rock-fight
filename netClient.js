@@ -1,13 +1,16 @@
 'use strict';
 /**
- * 前端联机模块（无构建，直接 <script src="net/netClient.js"></script> 引入）
+ * 前端联机模块（无构建，直接 <script src="netClient.js"></script> 引入）
  * 暴露 window.RockFightNet
+ *
+ * 底层传输：原生 WebSocket（由 rtClient.js 提供的 Socket.IO 形状垫片），
+ * 同一套协议同时兼容本地 Node 服务器与 Cloudflare Worker 部署。
  *
  * 服务器地址解析优先级：
  *   1) URL 参数 ?server=https://xxx
  *   2) localStorage 中上次保存的地址
  *   3) 若页面由 http(s) 打开，则默认同域（即服务器托管前端时的地址）
- * 绝不硬编码 localhost，方便部署到 Render / Railway / Fly.io 后直接使用。
+ * 绝不硬编码 localhost，方便部署到 Cloudflare / Render / 自有服务器后直接使用。
  */
 (function () {
   const SERVER_KEY = 'rockfight_server_url';
@@ -41,13 +44,13 @@
     else localStorage.removeItem(SESSION_KEY);
   }
 
-  function loadSocketIo(serverUrl) {
+  function loadTransport(serverUrl) {
     return new Promise((resolve, reject) => {
-      if (window.io) return resolve(window.io);
+      if (window.RockFightRt) return resolve(window.RockFightRt);
       const script = document.createElement('script');
-      script.src = `${serverUrl}/socket.io/socket.io.js`;
-      script.onload = () => (window.io ? resolve(window.io) : reject(new Error('socket.io 加载后未挂载')));
-      script.onerror = () => reject(new Error(`无法从 ${serverUrl} 加载 socket.io，请检查服务器地址`));
+      script.src = 'rtClient.js';
+      script.onload = () => (window.RockFightRt ? resolve(window.RockFightRt) : reject(new Error('rtClient.js 加载后未挂载')));
+      script.onerror = () => reject(new Error(`无法加载联机传输层 rtClient.js（服务器地址：${serverUrl}）`));
       document.head.appendChild(script);
     });
   }
@@ -86,10 +89,9 @@
     async connect(serverUrl) {
       if (serverUrl) this.setServerUrl(serverUrl);
       if (!this.serverUrl) throw new Error('请先填写服务器地址');
-      const io = await loadSocketIo(this.serverUrl);
+      const rt = await loadTransport(this.serverUrl);
       if (this.socket) { this.socket.removeAllListeners(); this.socket.disconnect(); }
-      this.socket = io(this.serverUrl, {
-        transports: ['websocket', 'polling'],
+      this.socket = rt.createSocket(this.serverUrl, {
         reconnection: true,
         reconnectionDelay: 500,
         reconnectionDelayMax: 4000

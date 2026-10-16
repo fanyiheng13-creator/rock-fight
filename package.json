@@ -13,9 +13,13 @@
   },
   "dependencies": {
     "express": "^4.19.2",
-    "socket.io": "^4.7.5"
+    "ws": "^8.18.0"
   },
   "devDependencies": {
-    "socket.io-client": "^4.8.4"
+    "wrangler": "^4.151.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261012.1": true
   }
 }

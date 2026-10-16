@@ -1,0 +1,29 @@
+# Cloudflare Workers 部署配置
+# 用法：npx wrangler deploy
+#
+# 免费套餐即可运行：
+#   - Workers：10 万请求/天
+#   - Durable Objects（SQLite 后端）：免费额度内可用，无需信用卡
+#   - 静态资源：不限量
+#
+# 说明：前端页面与 WebSocket 同域，所以前端不需要配置服务器地址。
+
+name = "rock-fight"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+
+# 房间状态常驻在 Durable Object 里（房间号、准备状态、战斗模拟）
+[durable_objects]
+bindings = [
+  { name = "GAME", class_name = "GameRoom" }
+]
+
+# 免费套餐必须使用 SQLite 后端的 Durable Object
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameRoom"]
+
+# 静态前端：把 public/ 里的文件发布到同域根路径
+[assets]
+directory = "./public"
+binding = "ASSETS"
